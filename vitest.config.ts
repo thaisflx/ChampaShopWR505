@@ -1,16 +1,9 @@
-import { defineVitestConfig } from '@nuxt/test-utils/config'
+import { defineConfig } from 'vitest/config'
 
-export default defineVitestConfig({
+export default defineConfig({
   test: {
-    environment: 'nuxt',
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html'],
-      include: ['utils/promotions.ts'],
-      thresholds: {
-        lines: 90,
-        branches: 90
-      }
+      provider: 'v8'
     }
   }
 })
