@@ -1,4 +1,5 @@
 ## Quoi ?
+
 Closes #
 
 ## Pourquoi / comment ?
@@ -6,6 +7,7 @@ Closes #
 ## Comment tester ?
 
 ## Checklist
+
 - [ ] npm run lint, npm run typecheck et npm run test passent
 - [ ] Pas de `any`, types exportés dans `types/`
 - [ ] Testé au clavier
