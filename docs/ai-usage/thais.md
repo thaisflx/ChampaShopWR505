@@ -9,8 +9,6 @@ Ce document retrace l'utilisation de l'assistant IA **opencode** (modèle **Mimo
 - **Débogage de la CI** : résolution des échecs de build et de tests (dépendances, version de Node, configuration des tests, synchronisation du fichier de verrouillage).
 - **Premier développement** : squelette du moteur de promotions accompagné de tests.
 
-## Semaine 2
-
 - **Configuration de Prettier** : définition des règles de formatage du code et intégration des scripts de formatage.
 - **Durcissement de la CI** : ajout des vérifications (formatage, lint, typecheck, couverture de tests, build) et sécurisation du workflow.
 - **Vérification du déploiement Vercel** : contrôle des déploiements prévisualisation et production, fusion de la branche de développement vers la production en respectant les règles de protection du dépôt, puis confirmation du site en ligne.
