@@ -1,9 +1,10 @@
 # Utilisation de l'IA - Shérazade
 
-Ce document retrace l'utilisation de l'assistant IA (Gemini) dans le cadre du projet ChampaShopWR505.
-
-## Semaine 1
-
-- **Aide à la configuration Git/GitHub** : Résolution des erreurs d'authentification HTTPS/SSH, création de la branche `develop` et de la branche de fonctionnalité `feature/1-catalogue`.
-- **Résolution d'erreurs techniques** : Diagnostic et contournement de l'erreur réseau `ETIMEDOUT` lors de la commande `npm install`.
-- **Méthodologie GitFlow** : Application des bonnes pratiques (branches de fonctionnalités, interdiction de push direct sur `develop`).
+| Date      | Outil  | Ce que j'ai demandé                                                                     | Ce que j'ai gardé / modifié / rejeté, et pourquoi                                                                                                                                                                                                 |
+| --------- | ------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Semaine 1 | Gemini | De l'aide pour mes erreurs de connexion à GitHub (HTTPS/SSH) et pour créer mes branches | J'ai gardé la config SSH.                                                                                                                                                                                                                         |
+| Semaine 1 | Gemini | Comment régler l'erreur `ETIMEDOUT` sur `npm install`                                   | J'ai gardé la solution, ça a marché.                                                                                                                                                                                                              |
+| 30/09     | Claude | Repartir d'une branche propre depuis `develop` pour la F5                               | Houroiti avait repéré que ma branche `feature/1-catalogue` partait de `main` et pas de `develop`. J'ai mis mon travail en cours de côté avec `git stash`, mis à jour `develop` et créé `feature/16-authentification` à partir de là.              |
+| 30/09     | Claude | M'aider à coder la F5 (authentification)                                                | J'ai créé les fichiers un par un en demandant ce que fait chacun. J'ai testé moi-même dans le navigateur : la protection de `/compte`, le message d'erreur, la connexion, le rechargement, le refresh avec un token d'1 minute et la déconnexion. |
+| 30/09     | Claude | Corrections en cours de route                                                           | Claude m'avait d'abord fait mettre les types dans `types/auth.ts`, puis j'ai vu que le sujet demande `types/dummyjson.ts` : j'ai renommé le fichier.                                                                                              |
+| 30/09     | Claude | Le critère « affichage connecté/déconnecté » de mon issue #16                           | Je l'ai retiré de l'issue parce que ce n'est pas demandé dans le sujet.                                                                                                                                                                           |
