@@ -29,9 +29,15 @@ function roundCents(value: number): number {
   return Math.round(value)
 }
 
-export function computeCart(lines: CartLine[], promoCode?: string): CartSummary {
+export function computeCart(
+  lines: CartLine[],
+  promoCode?: string,
+): CartSummary {
   const messages: string[] = []
-  const grossCents = lines.reduce((sum, line) => sum + line.unitPriceCents * line.quantity, 0)
+  const grossCents = lines.reduce(
+    (sum, line) => sum + line.unitPriceCents * line.quantity,
+    0,
+  )
 
   //Règle 1 REMISE BEAUTÉ
   const beautyQtyTotal = lines
@@ -59,7 +65,7 @@ export function computeCart(lines: CartLine[], promoCode?: string): CartSummary 
         codeDiscountCents = TROYES10_DISCOUNT_CENTS
       } else {
         messages.push(
-          'Code TROYES10 refusé : le sous-total après remise doit dépasser 50,00€'
+          'Code TROYES10 refusé : le sous-total après remise doit dépasser 50,00€',
         )
       }
     } else {
@@ -79,14 +85,14 @@ export function computeCart(lines: CartLine[], promoCode?: string): CartSummary 
     discounts.push({
       id: 'BEAUTY_3',
       label: 'Remise beauté -10% (3 articles ou plus)',
-      amountCents: beautyDiscountCents
+      amountCents: beautyDiscountCents,
     })
   }
   if (codeDiscountCents > 0) {
     discounts.push({
       id: 'TROYES10',
       label: 'Code TROYES10',
-      amountCents: codeDiscountCents
+      amountCents: codeDiscountCents,
     })
   }
 
@@ -107,6 +113,6 @@ export function computeCart(lines: CartLine[], promoCode?: string): CartSummary 
     discounts,
     shippingCents,
     totalCents,
-    messages
+    messages,
   }
 }

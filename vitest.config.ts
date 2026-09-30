@@ -7,8 +7,8 @@ export default defineConfig({
       include: ['utils/promotions.ts'],
       thresholds: {
         lines: 90,
-        branches: 90
-      }
-    }
-  }
+        branches: 90,
+      },
+    },
+  },
 })
