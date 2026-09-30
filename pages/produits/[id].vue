@@ -10,8 +10,8 @@ const productId = parseProductId(route.params.id)
 // /produits/abc : pas la peine d'appeler l'API, c'est une 404.
 if (productId === null) {
   throw createError({
-    statusCode: 404,
-    statusMessage: 'Produit introuvable',
+    status: 404,
+    statusText: 'Produit introuvable',
     fatal: true,
   })
 }
@@ -23,10 +23,10 @@ const { data: product, error } = await useFetch<Product>(
 
 // Identifiant inexistant : DummyJSON répond 404, on renvoie une vraie 404.
 if (error.value || !product.value) {
-  const notFound = error.value?.statusCode === 404
+  const notFound = error.value?.status === 404
   throw createError({
-    statusCode: notFound ? 404 : 500,
-    statusMessage: notFound
+    status: notFound ? 404 : 500,
+    statusText: notFound
       ? 'Produit introuvable'
       : 'Impossible de charger le produit',
     fatal: true,
