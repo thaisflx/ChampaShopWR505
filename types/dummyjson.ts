@@ -15,3 +15,77 @@ export interface User {
 
 // POST /auth/login renvoie l'utilisateur + les deux tokens
 export interface LoginResponse extends User, AuthTokens {}
+
+// ---------- Produits (F1) ----------
+// Écrits à partir d'une réponse réelle de GET /products.
+
+export interface ProductDimensions {
+  width: number
+  height: number
+  depth: number
+}
+
+export interface Review {
+  rating: number
+  comment: string
+  date: string
+  reviewerName: string
+  reviewerEmail: string
+}
+
+export interface ProductMeta {
+  createdAt: string
+  updatedAt: string
+  barcode: string
+  qrCode: string
+}
+
+export interface Product {
+  id: number
+  title: string
+  description: string
+  category: string
+  price: number
+  discountPercentage: number
+  rating: number
+  stock: number
+  tags: string[]
+  brand?: string // absent sur certains produits (ex. : les fruits)
+  sku: string
+  weight: number
+  dimensions: ProductDimensions
+  warrantyInformation: string
+  shippingInformation: string
+  availabilityStatus: string
+  reviews: Review[]
+  returnPolicy: string
+  minimumOrderQuantity: number
+  meta: ProductMeta
+  images: string[]
+  thumbnail: string
+}
+
+// Champs demandés au catalogue avec le paramètre `select` :
+// on ne télécharge que ce que la carte produit affiche.
+export const PRODUCT_SUMMARY_FIELDS = [
+  'title',
+  'price',
+  'discountPercentage',
+  'rating',
+  'thumbnail',
+] as const
+
+// `id` est toujours renvoyé par DummyJSON, même s'il n'est pas dans `select`.
+export type ProductSummary = Pick<
+  Product,
+  'id' | (typeof PRODUCT_SUMMARY_FIELDS)[number]
+>
+
+// Réponse paginée d'une liste de produits.
+// Générique : Product par défaut, ProductSummary quand on utilise `select`.
+export interface ProductsResponse<T = Product> {
+  products: T[]
+  total: number
+  skip: number
+  limit: number
+}
