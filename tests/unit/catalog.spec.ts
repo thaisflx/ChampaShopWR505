@@ -3,8 +3,10 @@ import type { ProductSummary } from '../../types/dummyjson'
 import {
   buildCatalogRequest,
   getCatalogViewState,
+  matchesClientFilters,
   paginateLocally,
   parseCategory,
+  parsePriceRange,
   parseSearch,
   parseSort,
   type CatalogFilters,
@@ -12,14 +14,23 @@ import {
 
 // Filtres par défaut : page 1, sans recherche, catégorie ni tri.
 function makeFilters(overrides: Partial<CatalogFilters> = {}): CatalogFilters {
-  return { page: 1, search: '', category: '', sort: null, ...overrides }
+  return {
+    page: 1,
+    search: '',
+    category: '',
+    sort: null,
+    price: { min: null, max: null },
+    ...overrides,
+  }
 }
 
-function makeProduct(id: number, category: string): ProductSummary {
+const NO_PRICE = { min: null, max: null }
+
+function makeProduct(id: number, category: string, price = 10): ProductSummary {
   return {
     id,
     title: `Produit ${id}`,
-    price: 10,
+    price,
     discountPercentage: 0,
     rating: 4,
     thumbnail: '',
@@ -107,6 +118,26 @@ describe('parseSort', () => {
   })
 })
 
+describe('parsePriceRange', () => {
+  it('lit les deux bornes', () => {
+    expect(parsePriceRange('50', '200')).toEqual({ min: 50, max: 200 })
+  })
+
+  it('accepte une seule borne et des décimales', () => {
+    expect(parsePriceRange('9.99', undefined)).toEqual({ min: 9.99, max: null })
+    expect(parsePriceRange(undefined, '100')).toEqual({ min: null, max: 100 })
+  })
+
+  it('ignore les valeurs vides, négatives ou invalides', () => {
+    expect(parsePriceRange('', 'abc')).toEqual({ min: null, max: null })
+    expect(parsePriceRange('-5', undefined)).toEqual({ min: null, max: null })
+  })
+
+  it('inverse les bornes si min est plus grand que max', () => {
+    expect(parsePriceRange('200', '50')).toEqual({ min: 50, max: 200 })
+  })
+})
+
 describe('buildCatalogRequest', () => {
   it('sans filtre, interroge /products avec pagination serveur', () => {
     const request = buildCatalogRequest(makeFilters({ page: 2 }))
@@ -157,6 +188,24 @@ describe('buildCatalogRequest', () => {
     expect(request.query).not.toHaveProperty('order')
   })
 
+  it('avec un filtre prix, passe en mode client sur /products', () => {
+    const request = buildCatalogRequest(
+      makeFilters({ price: { min: 50, max: null }, page: 3 }),
+    )
+    expect(request.path).toBe('/products')
+    expect(request.mode).toBe('client')
+    expect(request.query.limit).toBe(0)
+    expect(request.query.skip).toBe(0)
+  })
+
+  it('catégorie + prix : un seul appel à la catégorie, filtre prix côté client', () => {
+    const request = buildCatalogRequest(
+      makeFilters({ category: 'laptops', price: { min: null, max: 1500 } }),
+    )
+    expect(request.path).toBe('/products/category/laptops')
+    expect(request.mode).toBe('client')
+  })
+
   it('ne demande que les champs utiles au catalogue', () => {
     expect(buildCatalogRequest(makeFilters()).query.select).toBe(
       'title,price,discountPercentage,rating,thumbnail,category',
@@ -172,7 +221,11 @@ describe('paginateLocally', () => {
   const response = { products, total: 20, skip: 0, limit: 0 }
 
   it('garde seulement la catégorie demandée et recalcule le total', () => {
-    const result = paginateLocally(response, { page: 1, category: 'laptops' })
+    const result = paginateLocally(response, {
+      page: 1,
+      category: 'laptops',
+      price: NO_PRICE,
+    })
     expect(result.total).toBe(5)
     expect(result.products.every((p) => p.category === 'laptops')).toBe(true)
   })
@@ -181,10 +234,12 @@ describe('paginateLocally', () => {
     const page1 = paginateLocally(response, {
       page: 1,
       category: 'smartphones',
+      price: NO_PRICE,
     })
     const page2 = paginateLocally(response, {
       page: 2,
       category: 'smartphones',
+      price: NO_PRICE,
     })
     expect(page1.total).toBe(15)
     expect(page1.products).toHaveLength(12)
@@ -193,7 +248,80 @@ describe('paginateLocally', () => {
   })
 
   it("conserve l'ordre reçu de l'API (déjà trié)", () => {
-    const result = paginateLocally(response, { page: 1, category: 'laptops' })
+    const result = paginateLocally(response, {
+      page: 1,
+      category: 'laptops',
+      price: NO_PRICE,
+    })
     expect(result.products.map((p) => p.id)).toEqual([1, 5, 9, 13, 17])
+  })
+})
+
+describe('matchesClientFilters', () => {
+  const laptop = makeProduct(1, 'laptops', 1000)
+
+  it('accepte un produit dans la fourchette, bornes incluses', () => {
+    expect(
+      matchesClientFilters(laptop, {
+        category: '',
+        price: { min: 1000, max: 1000 },
+      }),
+    ).toBe(true)
+  })
+
+  it('refuse un produit hors fourchette', () => {
+    expect(
+      matchesClientFilters(laptop, {
+        category: '',
+        price: { min: 1001, max: null },
+      }),
+    ).toBe(false)
+    expect(
+      matchesClientFilters(laptop, {
+        category: '',
+        price: { min: null, max: 999 },
+      }),
+    ).toBe(false)
+  })
+
+  it('refuse un produit d’une autre catégorie', () => {
+    expect(
+      matchesClientFilters(laptop, {
+        category: 'smartphones',
+        price: NO_PRICE,
+      }),
+    ).toBe(false)
+  })
+})
+
+describe('paginateLocally avec un filtre prix', () => {
+  // Prix de 10 € à 200 € (10, 20, …, 200).
+  const products = Array.from({ length: 20 }, (_, i) =>
+    makeProduct(i + 1, 'laptops', (i + 1) * 10),
+  )
+  const response = { products, total: 20, skip: 0, limit: 0 }
+
+  it('garde les produits dans la fourchette et recalcule le total', () => {
+    const result = paginateLocally(response, {
+      page: 1,
+      category: '',
+      price: { min: 50, max: 100 },
+    })
+    expect(result.total).toBe(6)
+    expect(result.products.map((p) => p.price)).toEqual([
+      50, 60, 70, 80, 90, 100,
+    ])
+  })
+
+  it('pagine le résultat filtré, pas la liste complète', () => {
+    const page2 = paginateLocally(response, {
+      page: 2,
+      category: '',
+      price: { min: 30, max: null },
+    })
+    // 18 produits de 30 € à 200 € : la page 2 en contient 6.
+    expect(page2.total).toBe(18)
+    expect(page2.products).toHaveLength(6)
+    expect(page2.products[0]?.price).toBe(150)
   })
 })

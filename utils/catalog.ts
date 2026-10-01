@@ -71,10 +71,42 @@ export function parseSort(
   return { sortBy, order: order === 'desc' ? 'desc' : 'asc' }
 }
 
+export interface PriceRange {
+  min: number | null
+  max: number | null
+}
+
+function parsePrice(value: unknown): number | null {
+  const raw = Array.isArray(value) ? value[0] : value
+  if (typeof raw !== 'string' || raw.trim() === '') return null
+  const price = Number(raw)
+  return Number.isFinite(price) && price >= 0 ? price : null
+}
+
+/**
+ * Lit la fourchette de prix depuis l'URL (`?minPrice=50&maxPrice=200`).
+ * Une borne absente ou invalide vaut null (pas de limite).
+ * Si min > max, on les inverse : l'intention de l'utilisateur est claire.
+ */
+export function parsePriceRange(
+  minValue: unknown,
+  maxValue: unknown,
+): PriceRange {
+  const min = parsePrice(minValue)
+  const max = parsePrice(maxValue)
+  if (min !== null && max !== null && min > max) return { min: max, max: min }
+  return { min, max }
+}
+
+export function hasPriceFilter(price: PriceRange): boolean {
+  return price.min !== null || price.max !== null
+}
+
 /** Ce que le composant de filtres renvoie quand l'utilisateur change un choix. */
 export interface CatalogFiltersValue {
   category: string
   sort: CatalogSort | null
+  price: PriceRange
 }
 
 export interface CatalogFilters {
@@ -82,6 +114,7 @@ export interface CatalogFilters {
   search: string
   category: string
   sort: CatalogSort | null
+  price: PriceRange
 }
 
 export interface CatalogQuery {
@@ -98,8 +131,8 @@ export interface CatalogRequest {
   query: CatalogQuery
   /**
    * `server` : l'API filtre et pagine elle-même.
-   * `client` : l'API ne sait pas combiner les filtres demandés ; on récupère
-   * tous les produits candidats et on filtre + pagine nous-mêmes.
+   * `client` : l'API ne sait pas appliquer tous les filtres demandés ;
+   * on récupère tous les produits candidats, puis on filtre et pagine nous-mêmes.
    */
   mode: 'server' | 'client'
 }
@@ -107,65 +140,73 @@ export interface CatalogRequest {
 /**
  * Construit la requête à envoyer à DummyJSON pour une vue du catalogue.
  *
- * - rien         → GET /products
- * - recherche    → GET /products/search?q=…
- * - catégorie    → GET /products/category/<slug>
- * - les deux     → l'API ne sait pas chercher dans une catégorie :
- *                  GET /products/search?q=…&limit=0 (tous les résultats),
- *                  puis filtre par catégorie côté client (voir paginateLocally).
+ * L'endpoint dépend des filtres que l'API sait appliquer :
+ * - recherche  → GET /products/search?q=…
+ * - catégorie  → GET /products/category/<slug>
+ * - sinon      → GET /products
+ * Le tri (sortBy, order) est accepté par les trois.
  *
- * Le tri (sortBy, order) est accepté par les trois endpoints.
+ * Mode `client` quand l'API ne peut pas tout faire :
+ * - recherche + catégorie (pas d'endpoint qui combine les deux),
+ * - fourchette de prix (aucun filtre prix dans l'API).
+ * On demande alors tous les résultats (`limit=0`), déjà triés,
+ * et `paginateLocally` termine le travail. Justification dans le README.
  */
 export function buildCatalogRequest(filters: CatalogFilters): CatalogRequest {
   const sortQuery = filters.sort
     ? { sortBy: filters.sort.sortBy, order: filters.sort.order }
     : {}
-  const base = {
-    select: PRODUCT_SUMMARY_FIELDS.join(','),
-    ...sortQuery,
-  }
-  const pageQuery = {
-    limit: PAGE_SIZE,
-    skip: pageToSkip(filters.page),
-  }
+  const searchQuery = filters.search ? { q: filters.search } : {}
 
-  if (filters.search && filters.category) {
-    return {
-      path: '/products/search',
-      query: { ...base, q: filters.search, limit: 0, skip: 0 },
-      mode: 'client',
-    }
+  let path = '/products'
+  if (filters.search) path = '/products/search'
+  else if (filters.category) path = `/products/category/${filters.category}`
+
+  const needsClient =
+    (filters.search !== '' && filters.category !== '') ||
+    hasPriceFilter(filters.price)
+
+  return {
+    path,
+    query: {
+      select: PRODUCT_SUMMARY_FIELDS.join(','),
+      ...sortQuery,
+      ...searchQuery,
+      limit: needsClient ? 0 : PAGE_SIZE,
+      skip: needsClient ? 0 : pageToSkip(filters.page),
+    },
+    mode: needsClient ? 'client' : 'server',
   }
-  if (filters.search) {
-    return {
-      path: '/products/search',
-      query: { ...base, ...pageQuery, q: filters.search },
-      mode: 'server',
-    }
+}
+
+/** Le produit respecte-t-il la catégorie et la fourchette de prix ? */
+export function matchesClientFilters(
+  product: ProductSummary,
+  filters: Pick<CatalogFilters, 'category' | 'price'>,
+): boolean {
+  if (filters.category && product.category !== filters.category) return false
+  if (filters.price.min !== null && product.price < filters.price.min) {
+    return false
   }
-  if (filters.category) {
-    return {
-      path: `/products/category/${filters.category}`,
-      query: { ...base, ...pageQuery },
-      mode: 'server',
-    }
+  if (filters.price.max !== null && product.price > filters.price.max) {
+    return false
   }
-  return { path: '/products', query: { ...base, ...pageQuery }, mode: 'server' }
+  return true
 }
 
 /**
- * Mode `client` : à partir de tous les produits reçus, garde ceux de la
- * catégorie demandée, puis découpe la page voulue. L'ordre (déjà trié par
- * l'API) est conservé. Renvoie la même forme qu'une réponse paginée de l'API,
- * pour que la page n'ait pas à savoir quel mode a été utilisé.
+ * Mode `client` : à partir de tous les produits reçus, garde ceux qui
+ * respectent la catégorie et le prix, puis découpe la page voulue.
+ * L'ordre (déjà trié par l'API) est conservé. Renvoie la même forme qu'une
+ * réponse paginée de l'API : la page n'a pas à savoir quel mode a été utilisé.
  */
 export function paginateLocally(
   response: ProductsResponse<ProductSummary>,
-  filters: Pick<CatalogFilters, 'page' | 'category'>,
+  filters: Pick<CatalogFilters, 'page' | 'category' | 'price'>,
 ): ProductsResponse<ProductSummary> {
-  const matching = filters.category
-    ? response.products.filter((p) => p.category === filters.category)
-    : response.products
+  const matching = response.products.filter((product) =>
+    matchesClientFilters(product, filters),
+  )
   const skip = pageToSkip(filters.page)
   return {
     products: matching.slice(skip, skip + PAGE_SIZE),
