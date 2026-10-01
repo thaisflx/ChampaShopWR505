@@ -1,5 +1,7 @@
 // Logique de la fiche produit : fonctions pures, testables avec Vitest.
 
+import { parsePositiveInt } from './params'
+
 export const LOW_STOCK_THRESHOLD = 5
 
 export interface StockStatus {
@@ -32,7 +34,5 @@ export function getStockStatus(stock: number): StockStatus {
  * Renvoie null si ce n'est pas un entier positif (`/produits/abc`).
  */
 export function parseProductId(value: unknown): number | null {
-  const raw = Array.isArray(value) ? value[0] : value
-  const id = Number(raw)
-  return Number.isInteger(id) && id >= 1 ? id : null
+  return parsePositiveInt(value)
 }
