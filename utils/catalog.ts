@@ -20,20 +20,46 @@ export function getCatalogViewState(
   return productCount === 0 ? 'empty' : 'ready'
 }
 
+/**
+ * Lit le texte recherché depuis l'URL (`?q=mascara`).
+ * Renvoie une chaîne vide si absent ou invalide ; les espaces autour sont retirés.
+ */
+export function parseSearch(value: unknown): string {
+  const raw = Array.isArray(value) ? value[0] : value
+  return typeof raw === 'string' ? raw.trim() : ''
+}
+
+export interface CatalogFilters {
+  page: number
+  search: string
+}
+
 export interface CatalogQuery {
   limit: number
   skip: number
   select: string
+  q?: string
+}
+
+export interface CatalogRequest {
+  path: '/products' | '/products/search'
+  query: CatalogQuery
 }
 
 /**
- * Construit les paramètres envoyés à GET /products pour une page du catalogue.
- * Les semaines suivantes, on y ajoutera recherche, catégorie et tri.
+ * Construit la requête à envoyer à DummyJSON pour une vue du catalogue.
+ * Avec une recherche, on utilise GET /products/search?q=… ;
+ * sans recherche, GET /products. La pagination fonctionne pareil sur les deux.
  */
-export function buildCatalogQuery(page: number): CatalogQuery {
-  return {
+export function buildCatalogRequest(filters: CatalogFilters): CatalogRequest {
+  const query: CatalogQuery = {
     limit: PAGE_SIZE,
-    skip: pageToSkip(page),
+    skip: pageToSkip(filters.page),
     select: PRODUCT_SUMMARY_FIELDS.join(','),
   }
+
+  if (filters.search) {
+    return { path: '/products/search', query: { ...query, q: filters.search } }
+  }
+  return { path: '/products', query }
 }

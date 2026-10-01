@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildCatalogQuery, getCatalogViewState } from '../../utils/catalog'
+import {
+  buildCatalogRequest,
+  getCatalogViewState,
+  parseSearch,
+} from '../../utils/catalog'
 
 describe('getCatalogViewState', () => {
   it('affiche le chargement tant que la requête est en cours', () => {
@@ -24,15 +28,45 @@ describe('getCatalogViewState', () => {
   })
 })
 
-describe('buildCatalogQuery', () => {
-  it('demande 12 produits à partir du bon index', () => {
-    const query = buildCatalogQuery(2)
-    expect(query.limit).toBe(12)
-    expect(query.skip).toBe(12)
+describe('parseSearch', () => {
+  it('lit le texte recherché en retirant les espaces autour', () => {
+    expect(parseSearch('  mascara ')).toBe('mascara')
+  })
+
+  it('renvoie une chaîne vide si le paramètre est absent', () => {
+    expect(parseSearch(undefined)).toBe('')
+    expect(parseSearch(null)).toBe('')
+  })
+
+  it('prend la première valeur si le paramètre est répété', () => {
+    expect(parseSearch(['phone', 'laptop'])).toBe('phone')
+  })
+})
+
+describe('buildCatalogRequest', () => {
+  it('sans recherche, interroge /products', () => {
+    const request = buildCatalogRequest({ page: 2, search: '' })
+    expect(request.path).toBe('/products')
+    expect(request.query.limit).toBe(12)
+    expect(request.query.skip).toBe(12)
+    expect(request.query.q).toBeUndefined()
+  })
+
+  it('avec une recherche, interroge /products/search avec q', () => {
+    const request = buildCatalogRequest({ page: 1, search: 'phone' })
+    expect(request.path).toBe('/products/search')
+    expect(request.query.q).toBe('phone')
+    expect(request.query.skip).toBe(0)
+  })
+
+  it('pagine aussi les résultats de recherche', () => {
+    expect(buildCatalogRequest({ page: 3, search: 'phone' }).query.skip).toBe(
+      24,
+    )
   })
 
   it('ne demande que les champs affichés par la carte produit', () => {
-    expect(buildCatalogQuery(1).select).toBe(
+    expect(buildCatalogRequest({ page: 1, search: '' }).query.select).toBe(
       'title,price,discountPercentage,rating,thumbnail',
     )
   })
