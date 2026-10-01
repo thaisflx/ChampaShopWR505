@@ -7,7 +7,7 @@ import {
   toCartLines,
   eurosToCents,
   productToCartItem,
-  type CartItem
+  type CartItem,
 } from '../../utils/cart'
 import type { Product } from '../../types/dummyjson'
 
