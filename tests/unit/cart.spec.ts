@@ -88,3 +88,37 @@ describe('toCartLines', () => {
     ])
   })
 })
+
+import { eurosToCents, productToCartItem } from '../../utils/cart'
+import type { Product } from '../../types/dummyjson'
+
+describe('eurosToCents', () => {
+  it('convertit un prix décimal en centimes entiers', () => {
+    expect(eurosToCents(9.99)).toBe(999)
+    expect(eurosToCents(19.9)).toBe(1990)
+  })
+
+  it('arrondit correctement les flottants imprécis', () => {
+    expect(eurosToCents(10.1)).toBe(1010)
+  })
+})
+
+describe('productToCartItem', () => {
+  it('convertit un Product DummyJSON en item de panier', () => {
+    const product = {
+      id: 42,
+      title: 'Savon artisanal',
+      category: 'beauty',
+      price: 12.5,
+      thumbnail: 'https://example.com/savon.jpg'
+    } as Product
+
+    expect(productToCartItem(product)).toEqual({
+      productId: 42,
+      title: 'Savon artisanal',
+      category: 'beauty',
+      unitPriceCents: 1250,
+      thumbnail: 'https://example.com/savon.jpg'
+    })
+  })
+})

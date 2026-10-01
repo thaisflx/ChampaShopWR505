@@ -1,4 +1,5 @@
 import type { CartLine } from './promotions'
+import type { Product } from '../types/dummyjson'
 
 export interface CartItem {
   productId: number
@@ -49,4 +50,18 @@ export function toCartLines(items: CartItem[]): CartLine[] {
     unitPriceCents,
     quantity
   }))
+}
+
+export function eurosToCents(amount: number): number {
+  return Math.round(amount * 100)
+}
+
+export function productToCartItem(product: Product): Omit<CartItem, 'quantity'> {
+  return {
+    productId: product.id,
+    title: product.title,
+    category: product.category,
+    unitPriceCents: eurosToCents(product.price),
+    thumbnail: product.thumbnail
+  }
 }
