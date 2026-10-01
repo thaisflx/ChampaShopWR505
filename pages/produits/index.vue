@@ -2,19 +2,27 @@
 import type { ProductSummary, ProductsResponse } from '~/types/dummyjson'
 
 const route = useRoute()
+const router = useRouter()
 
-// L'URL est la source de vérité : la page affichée vient de `?page=`.
+// L'URL est la source de vérité : page (`?page=`) et recherche (`?q=`).
 const page = computed(() => parsePage(route.query.page))
-const query = computed(() => buildCatalogQuery(page.value))
+const search = computed(() => parseSearch(route.query.q))
+const request = computed(() =>
+  buildCatalogRequest({ page: page.value, search: search.value }),
+)
 
 // useFetch s'exécute côté serveur au premier affichage (SSR),
-// puis côté client quand `query` change (clic sur « Suivant »).
+// puis côté client à chaque changement de l'URL (chemin ou paramètres).
 // `status` indique où en est la requête ; `refresh` la relance.
 const { data, status, refresh } = await useFetch<
   ProductsResponse<ProductSummary>
->('/products', {
+>(() => request.value.path, {
   baseURL: API_BASE,
-  query,
+  query: computed(() => request.value.query),
+  // Frappe rapide : si une requête est encore en cours quand une nouvelle part,
+  // seule la réponse de la plus récente est gardée. Une réponse plus ancienne
+  // est ignorée : elle ne peut jamais écraser les résultats affichés.
+  dedupe: 'cancel',
 })
 
 const products = computed(() => data.value?.products ?? [])
@@ -26,13 +34,25 @@ const viewState = computed(() =>
 // Autant de cartes grises que de produits attendus.
 const skeletonCount = PAGE_SIZE
 
-// Lien vers la première page, en gardant les autres paramètres de l'URL.
-const firstPageLink = computed(() => ({
-  query: { ...route.query, page: undefined },
+// Nouvelle recherche : on l'écrit dans l'URL et on revient en page 1.
+// `replace` plutôt que `push` : on ne crée pas une entrée d'historique
+// par mot tapé, sinon le bouton retour remonterait lettre par lettre.
+function onSearch(value: string): void {
+  router.replace({
+    query: { ...route.query, q: value || undefined, page: undefined },
+  })
+}
+
+// Lien « tout le catalogue » : sans recherche, en page 1.
+const resetLink = computed(() => ({
+  query: { ...route.query, q: undefined, page: undefined },
 }))
 
 useSeoMeta({
-  title: () => `Catalogue – page ${page.value} | ChampaShop`,
+  title: () =>
+    search.value
+      ? `Recherche « ${search.value} » – page ${page.value} | ChampaShop`
+      : `Catalogue – page ${page.value} | ChampaShop`,
   description:
     'Découvrez le catalogue ChampaShop : beauté, maison, épicerie et plus encore.',
 })
@@ -41,6 +61,8 @@ useSeoMeta({
 <template>
   <section>
     <h1>Catalogue</h1>
+
+    <CatalogSearch :value="search" @search="onSearch" />
 
     <!-- Chargement : des cartes grises à la place des produits -->
     <div v-if="viewState === 'loading'" aria-busy="true">
@@ -59,10 +81,11 @@ useSeoMeta({
       @retry="refresh()"
     />
 
-    <!-- Aucun résultat (ex. : ?page=99) -->
+    <!-- Aucun résultat (recherche sans résultat, ?page=99…) -->
     <div v-else-if="viewState === 'empty'" class="empty" role="status">
-      <p>Aucun produit trouvé.</p>
-      <NuxtLink :to="firstPageLink">Revenir au début du catalogue</NuxtLink>
+      <p v-if="search">Aucun produit ne correspond à « {{ search }} ».</p>
+      <p v-else>Aucun produit trouvé.</p>
+      <NuxtLink :to="resetLink">Voir tout le catalogue</NuxtLink>
     </div>
 
     <!-- Produits -->
