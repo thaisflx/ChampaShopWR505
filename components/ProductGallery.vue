@@ -20,7 +20,7 @@ const selectedImage = computed(() => props.images[selectedIndex.value] ?? '')
     />
 
     <ul v-if="images.length > 1" class="gallery__thumbs">
-      <li v-for="(image, index) in images" :key="image">
+      <li v-for="(image, index) in images" :key="index">
         <button
           type="button"
           class="gallery__thumb"
