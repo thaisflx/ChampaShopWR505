@@ -42,6 +42,32 @@ useSeoMeta({
   ogDescription: () => product.value?.description ?? '',
   ogImage: () => product.value?.thumbnail ?? '',
 })
+
+const cartStore = useCartStore()
+const justAdded = ref(false)
+const stockLimitReached = ref(false)
+let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
+
+function handleAddToCart(): void {
+  if (!product.value || !stock.value.canAddToCart) return
+  const alreadyInCart = cartStore.items.find(
+    (item) => item.productId === product.value!.id,
+  )
+  const currentQuantity = alreadyInCart?.quantity ?? 0
+
+  if (currentQuantity >= product.value.stock) {
+    stockLimitReached.value = true
+  } else {
+    cartStore.addItem(productToCartItem(product.value))
+    justAdded.value = true
+  }
+
+  clearTimeout(feedbackTimeout)
+  feedbackTimeout = setTimeout(() => {
+    justAdded.value = false
+    stockLimitReached.value = false
+  }, 2000)
+}
 </script>
 
 <template>
@@ -81,9 +107,20 @@ useSeoMeta({
         <button
           type="button"
           class="product__add"
+          :class="{
+            'product__add--added': justAdded,
+            'product__add--limit': stockLimitReached,
+          }"
           :disabled="!stock.canAddToCart"
+          @click="handleAddToCart"
         >
-          Ajouter au panier
+          {{
+            stockLimitReached
+              ? 'Stock maximum atteint'
+              : justAdded
+                ? 'Ajouté ✓'
+                : 'Ajouter au panier'
+          }}
         </button>
 
         <dl class="product__details">
@@ -144,6 +181,10 @@ useSeoMeta({
   color: #b3261e;
 }
 
+.product__add--limit {
+  background: #8a4b00;
+}
+
 .product__add {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -158,6 +199,10 @@ useSeoMeta({
 .product__add:disabled {
   background: #767676;
   cursor: not-allowed;
+}
+
+.product__add--added {
+  background: #1b6b2f;
 }
 
 .product__add:focus-visible {
