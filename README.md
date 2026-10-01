@@ -122,7 +122,26 @@ Le workflow `.github/workflows/ci.yml` s'exécute sur chaque PR et chaque push v
 
 ### Filtre prix min/max
 
-_À compléter avec la fonctionnalité F1 : DummyJSON ne propose pas de filtre par prix, la stratégie retenue (appels, performance, pagination) sera justifiée ici._
+**Problème.** DummyJSON ne propose aucun filtre par prix : `/products`, `/products/search` et `/products/category/<slug>` ne connaissent que `limit`, `skip`, `select`, `sortBy` et `order`. L'API ne sait pas non plus combiner une recherche et une catégorie.
+
+**Stratégie retenue : deux modes, choisis par `buildCatalogRequest` (`utils/catalog.ts`).**
+
+- **Mode `server`** (cas courant : aucun filtre, recherche seule ou catégorie seule) : l'API filtre, trie et pagine elle-même. On demande uniquement la page affichée (`limit=12&skip=…`).
+- **Mode `client`** (fourchette de prix, ou recherche + catégorie) : on fait **un seul appel** à l'endpoint le plus restrictif possible (`/products/search` s'il y a une recherche, sinon `/products/category/<slug>`, sinon `/products`) avec `limit=0` pour obtenir **tous** les candidats, déjà triés par l'API grâce à `sortBy` / `order`. La fonction pure `paginateLocally` garde ensuite ceux qui respectent la catégorie et le prix, recalcule le total et découpe la page de 12.
+
+**Appels.** Un seul appel par changement de filtre, quel que soit le mode. Le filtrage est fait dans l'option `transform` de `useFetch`, qui s'exécute là où la requête a lieu : **sur le serveur** au premier rendu. Le serveur reçoit tous les candidats, mais **seuls les 12 produits de la page** sont envoyés au navigateur dans le HTML et le payload. Le rendu reste SSR, et l'URL (`?minPrice=…&maxPrice=…`) reproduit exactement la même vue.
+
+**Performance.** Le catalogue compte 194 produits. Grâce à `select`, on ne télécharge que 7 champs par produit (dont l'URL de la miniature) : la réponse complète reste de l'ordre de quelques dizaines de ko. Partir de l'endpoint le plus restrictif (catégorie ou recherche) réduit encore ce volume.
+
+**Pagination.** Le total et le nombre de pages sont calculés **après** le filtrage : chaque page contient bien 12 produits (sauf la dernière) et « Page X sur Y » est exact.
+
+**Alternatives écartées.**
+
+- _Filtrer seulement la page renvoyée par l'API_ : un appel léger, mais des pages incomplètes (voire vides alors qu'il existe des résultats plus loin) et un total faux.
+- _Charger les pages une par une jusqu'à en avoir 12 qui correspondent_ : plusieurs appels successifs, donc plus lent, et le total reste inconnu, ce qui rend la pagination impossible à afficher.
+- _Tout charger une fois dans le navigateur et tout filtrer côté client_ : perd le rendu côté serveur et envoie tout le catalogue au navigateur à chaque visite.
+
+**Limite.** Cette stratégie suppose un catalogue de taille modeste. Avec des dizaines de milliers de produits, il faudrait un filtre prix côté serveur : une route serveur Nuxt (`server/api/`) qui mettrait en cache le catalogue, ou une API qui supporte le filtre.
 
 ## Utilisation de l'IA
 
