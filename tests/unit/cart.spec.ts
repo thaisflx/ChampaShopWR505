@@ -5,8 +5,11 @@ import {
   updateItemQuantity,
   getItemCount,
   toCartLines,
-  type CartItem,
+  eurosToCents,
+  productToCartItem,
+  type CartItem
 } from '../../utils/cart'
+import type { Product } from '../../types/dummyjson'
 
 const productA: Omit<CartItem, 'quantity'> = {
   productId: 1,
@@ -94,9 +97,6 @@ describe('toCartLines', () => {
     ])
   })
 })
-
-import { eurosToCents, productToCartItem } from '../../utils/cart'
-import type { Product } from '../../types/dummyjson'
 
 describe('eurosToCents', () => {
   it('convertit un prix décimal en centimes entiers', () => {
