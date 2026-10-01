@@ -7,44 +7,49 @@ export interface CartItem {
   category: string
   unitPriceCents: number
   thumbnail?: string
+  stock: number
+  quantity: number
+}
+
+// Ce qu'on garde dans le cookie : juste de quoi reconstruire le panier,
+// pour rester largement sous la limite de 4 Ko (le titre/l'image sont
+// re-téléchargés depuis l'API à chaque visite, pas stockés).
+export interface MinimalCartItem {
+  productId: number
   quantity: number
 }
 
 export function addItemToCart(
   items: CartItem[],
   product: Omit<CartItem, 'quantity'>,
-  quantity = 1,
+  quantity = 1
 ): CartItem[] {
-  const existingIndex = items.findIndex(
-    (item) => item.productId === product.productId,
-  )
+  const existingIndex = items.findIndex((item) => item.productId === product.productId)
   if (existingIndex === -1) {
-    return [...items, { ...product, quantity }]
+    const cappedQuantity = Math.min(quantity, product.stock)
+    return cappedQuantity > 0 ? [...items, { ...product, quantity: cappedQuantity }] : items
   }
   return items.map((item, index) =>
     index === existingIndex
-      ? { ...item, quantity: item.quantity + quantity }
-      : item,
+      ? { ...item, quantity: Math.min(item.quantity + quantity, item.stock) }
+      : item
   )
 }
 
-export function removeItemFromCart(
-  items: CartItem[],
-  productId: number,
-): CartItem[] {
+export function removeItemFromCart(items: CartItem[], productId: number): CartItem[] {
   return items.filter((item) => item.productId !== productId)
 }
 
 export function updateItemQuantity(
   items: CartItem[],
   productId: number,
-  quantity: number,
+  quantity: number
 ): CartItem[] {
   if (quantity <= 0) {
     return removeItemFromCart(items, productId)
   }
   return items.map((item) =>
-    item.productId === productId ? { ...item, quantity } : item,
+    item.productId === productId ? { ...item, quantity: Math.min(quantity, item.stock) } : item
   )
 }
 
@@ -57,22 +62,25 @@ export function toCartLines(items: CartItem[]): CartLine[] {
     productId,
     category,
     unitPriceCents,
-    quantity,
+    quantity
   }))
+}
+
+export function toMinimalCartItems(items: CartItem[]): MinimalCartItem[] {
+  return items.map(({ productId, quantity }) => ({ productId, quantity }))
 }
 
 export function eurosToCents(amount: number): number {
   return Math.round(amount * 100)
 }
 
-export function productToCartItem(
-  product: Product,
-): Omit<CartItem, 'quantity'> {
+export function productToCartItem(product: Product): Omit<CartItem, 'quantity'> {
   return {
     productId: product.id,
     title: product.title,
     category: product.category,
     unitPriceCents: eurosToCents(product.price),
     thumbnail: product.thumbnail,
+    stock: product.stock
   }
 }

@@ -5,9 +5,10 @@ import {
   updateItemQuantity,
   getItemCount,
   toCartLines,
+  toMinimalCartItems,
   eurosToCents,
   productToCartItem,
-  type CartItem,
+  type CartItem
 } from '../../utils/cart'
 import type { Product } from '../../types/dummyjson'
 
@@ -16,6 +17,7 @@ const productA: Omit<CartItem, 'quantity'> = {
   title: 'Crème hydratante',
   category: 'beauty',
   unitPriceCents: 1999,
+  stock: 10
 }
 
 const productB: Omit<CartItem, 'quantity'> = {
@@ -23,6 +25,7 @@ const productB: Omit<CartItem, 'quantity'> = {
   title: 'Café en grains',
   category: 'groceries',
   unitPriceCents: 1200,
+  stock: 10
 }
 
 describe('addItemToCart', () => {
@@ -36,14 +39,24 @@ describe('addItemToCart', () => {
     const result = addItemToCart(initial, productA, 2)
     expect(result).toEqual([{ ...productA, quantity: 3 }])
   })
+
+  it('plafonne la quantité ajoutée au stock disponible', () => {
+    const lowStock = { ...productA, stock: 3 }
+    const result = addItemToCart([], lowStock, 5)
+    expect(result[0].quantity).toBe(3)
+  })
+
+  it('plafonne au stock même en cumulant avec une quantité déjà présente', () => {
+    const lowStock = { ...productA, stock: 3 }
+    const initial: CartItem[] = [{ ...lowStock, quantity: 2 }]
+    const result = addItemToCart(initial, lowStock, 5)
+    expect(result[0].quantity).toBe(3)
+  })
 })
 
 describe('removeItemFromCart', () => {
   it('retire l’article ciblé', () => {
-    const initial: CartItem[] = [
-      { ...productA, quantity: 1 },
-      { ...productB, quantity: 1 },
-    ]
+    const initial: CartItem[] = [{ ...productA, quantity: 1 }, { ...productB, quantity: 1 }]
     const result = removeItemFromCart(initial, 1)
     expect(result).toEqual([{ ...productB, quantity: 1 }])
   })
@@ -62,6 +75,13 @@ describe('updateItemQuantity', () => {
     expect(result[0].quantity).toBe(5)
   })
 
+  it('plafonne la quantité au stock disponible', () => {
+    const lowStock = { ...productA, stock: 4 }
+    const initial: CartItem[] = [{ ...lowStock, quantity: 1 }]
+    const result = updateItemQuantity(initial, 1, 20)
+    expect(result[0].quantity).toBe(4)
+  })
+
   it('retire l’article si la quantité devient 0', () => {
     const initial: CartItem[] = [{ ...productA, quantity: 1 }]
     const result = updateItemQuantity(initial, 1, 0)
@@ -77,10 +97,7 @@ describe('updateItemQuantity', () => {
 
 describe('getItemCount', () => {
   it('additionne les quantités de toutes les lignes', () => {
-    const items: CartItem[] = [
-      { ...productA, quantity: 2 },
-      { ...productB, quantity: 3 },
-    ]
+    const items: CartItem[] = [{ ...productA, quantity: 2 }, { ...productB, quantity: 3 }]
     expect(getItemCount(items)).toBe(5)
   })
 
@@ -93,8 +110,15 @@ describe('toCartLines', () => {
   it('convertit les CartItem en CartLine pour computeCart', () => {
     const items: CartItem[] = [{ ...productA, quantity: 2 }]
     expect(toCartLines(items)).toEqual([
-      { productId: 1, category: 'beauty', unitPriceCents: 1999, quantity: 2 },
+      { productId: 1, category: 'beauty', unitPriceCents: 1999, quantity: 2 }
     ])
+  })
+})
+
+describe('toMinimalCartItems', () => {
+  it('ne garde que productId et quantity, pour le cookie', () => {
+    const items: CartItem[] = [{ ...productA, quantity: 2 }]
+    expect(toMinimalCartItems(items)).toEqual([{ productId: 1, quantity: 2 }])
   })
 })
 
@@ -117,6 +141,7 @@ describe('productToCartItem', () => {
       category: 'beauty',
       price: 12.5,
       thumbnail: 'https://example.com/savon.jpg',
+      stock: 7
     } as Product
 
     expect(productToCartItem(product)).toEqual({
@@ -125,6 +150,7 @@ describe('productToCartItem', () => {
       category: 'beauty',
       unitPriceCents: 1250,
       thumbnail: 'https://example.com/savon.jpg',
+      stock: 7
     })
   })
 })

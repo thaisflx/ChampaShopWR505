@@ -45,16 +45,26 @@ useSeoMeta({
 
 const cartStore = useCartStore()
 const justAdded = ref(false)
-let justAddedTimeout: ReturnType<typeof setTimeout> | undefined
+const stockLimitReached = ref(false)
+let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
 
 function handleAddToCart(): void {
   if (!product.value || !stock.value.canAddToCart) return
-  cartStore.addItem(productToCartItem(product.value))
-  justAdded.value = true
-  clearTimeout(justAddedTimeout)
-  justAddedTimeout = setTimeout(() => {
+  const alreadyInCart = cartStore.items.find((item) => item.productId === product.value!.id)
+  const currentQuantity = alreadyInCart?.quantity ?? 0
+
+  if (currentQuantity >= product.value.stock) {
+    stockLimitReached.value = true
+  } else {
+    cartStore.addItem(productToCartItem(product.value))
+    justAdded.value = true
+  }
+
+  clearTimeout(feedbackTimeout)
+  feedbackTimeout = setTimeout(() => {
     justAdded.value = false
-  }, 1500)
+    stockLimitReached.value = false
+  }, 2000)
 }
 </script>
 
@@ -95,11 +105,11 @@ function handleAddToCart(): void {
         <button
           type="button"
           class="product__add"
-          :class="{ 'product__add--added': justAdded }"
+          :class="{ 'product__add--added': justAdded, 'product__add--limit': stockLimitReached }"
           :disabled="!stock.canAddToCart"
           @click="handleAddToCart"
         >
-          {{ justAdded ? 'Ajouté ✓' : 'Ajouter au panier' }}
+          {{ stockLimitReached ? 'Stock maximum atteint' : justAdded ? 'Ajouté ✓' : 'Ajouter au panier' }}
         </button>
 
         <dl class="product__details">
@@ -158,6 +168,10 @@ function handleAddToCart(): void {
 
 .product__stock--out {
   color: #b3261e;
+}
+
+.product__add--limit {
+  background: #8a4b00;
 }
 
 .product__add {
