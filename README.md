@@ -112,11 +112,11 @@ Le workflow `.github/workflows/ci.yml` s'exécute sur chaque PR et chaque push v
 
 ## Équipe et répartition
 
-| Membre    | Semaine 1                                                    |
-| --------- | ------------------------------------------------------------ |
-| Houroiti  | F1 Catalogue, F2 Fiche produit, F3 Panier                    |
-| Thaïs     | F4 Moteur de promotions, mise en place du projet et de la CI |
-| Sherazade | F5 Authentification DummyJSON                                |
+| Membre    | Semaine 1                                                               |
+| --------- | ----------------------------------------------------------------------- |
+| Houroiti  | F1 Catalogue (pagination, états, recherche, filtres, tri, prix)         |
+| Thaïs     | F3 Panier, F4 Moteur de promotions, mise en place du projet et de la CI |
+| Sherazade | F2 Fiche produit, F5 Authentification DummyJSON                         |
 
 ## Choix techniques
 
