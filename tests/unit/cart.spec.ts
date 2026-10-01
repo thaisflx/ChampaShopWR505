@@ -5,21 +5,21 @@ import {
   updateItemQuantity,
   getItemCount,
   toCartLines,
-  type CartItem
+  type CartItem,
 } from '../../utils/cart'
 
 const productA: Omit<CartItem, 'quantity'> = {
   productId: 1,
   title: 'Crème hydratante',
   category: 'beauty',
-  unitPriceCents: 1999
+  unitPriceCents: 1999,
 }
 
 const productB: Omit<CartItem, 'quantity'> = {
   productId: 2,
   title: 'Café en grains',
   category: 'groceries',
-  unitPriceCents: 1200
+  unitPriceCents: 1200,
 }
 
 describe('addItemToCart', () => {
@@ -37,7 +37,10 @@ describe('addItemToCart', () => {
 
 describe('removeItemFromCart', () => {
   it('retire l’article ciblé', () => {
-    const initial: CartItem[] = [{ ...productA, quantity: 1 }, { ...productB, quantity: 1 }]
+    const initial: CartItem[] = [
+      { ...productA, quantity: 1 },
+      { ...productB, quantity: 1 },
+    ]
     const result = removeItemFromCart(initial, 1)
     expect(result).toEqual([{ ...productB, quantity: 1 }])
   })
@@ -71,7 +74,10 @@ describe('updateItemQuantity', () => {
 
 describe('getItemCount', () => {
   it('additionne les quantités de toutes les lignes', () => {
-    const items: CartItem[] = [{ ...productA, quantity: 2 }, { ...productB, quantity: 3 }]
+    const items: CartItem[] = [
+      { ...productA, quantity: 2 },
+      { ...productB, quantity: 3 },
+    ]
     expect(getItemCount(items)).toBe(5)
   })
 
@@ -84,7 +90,7 @@ describe('toCartLines', () => {
   it('convertit les CartItem en CartLine pour computeCart', () => {
     const items: CartItem[] = [{ ...productA, quantity: 2 }]
     expect(toCartLines(items)).toEqual([
-      { productId: 1, category: 'beauty', unitPriceCents: 1999, quantity: 2 }
+      { productId: 1, category: 'beauty', unitPriceCents: 1999, quantity: 2 },
     ])
   })
 })
@@ -110,7 +116,7 @@ describe('productToCartItem', () => {
       title: 'Savon artisanal',
       category: 'beauty',
       price: 12.5,
-      thumbnail: 'https://example.com/savon.jpg'
+      thumbnail: 'https://example.com/savon.jpg',
     } as Product
 
     expect(productToCartItem(product)).toEqual({
@@ -118,7 +124,7 @@ describe('productToCartItem', () => {
       title: 'Savon artisanal',
       category: 'beauty',
       unitPriceCents: 1250,
-      thumbnail: 'https://example.com/savon.jpg'
+      thumbnail: 'https://example.com/savon.jpg',
     })
   })
 })

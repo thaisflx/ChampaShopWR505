@@ -6,7 +6,7 @@ import {
   updateItemQuantity,
   getItemCount,
   toCartLines,
-  type CartItem
+  type CartItem,
 } from '~/utils/cart'
 
 const CART_COOKIE_NAME = 'champashop_cart'
@@ -16,7 +16,7 @@ export const useCartStore = defineStore('cart', () => {
   const cartCookie = useCookie<CartItem[]>(CART_COOKIE_NAME, {
     default: () => [],
     maxAge: CART_COOKIE_MAX_AGE_SECONDS,
-    sameSite: 'lax'
+    sameSite: 'lax',
   })
 
   const items = ref<CartItem[]>(cartCookie.value ?? [])
@@ -27,7 +27,7 @@ export const useCartStore = defineStore('cart', () => {
     (value) => {
       cartCookie.value = value
     },
-    { deep: true }
+    { deep: true },
   )
 
   function addItem(product: Omit<CartItem, 'quantity'>, quantity = 1): void {
@@ -52,7 +52,9 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   const itemCount = computed(() => getItemCount(items.value))
-  const summary = computed(() => computeCart(toCartLines(items.value), promoCode.value))
+  const summary = computed(() =>
+    computeCart(toCartLines(items.value), promoCode.value),
+  )
 
   return {
     items,
@@ -63,6 +65,6 @@ export const useCartStore = defineStore('cart', () => {
     removeItem,
     updateQuantity,
     applyPromoCode,
-    clearCart
+    clearCart,
   }
 })
