@@ -3,6 +3,7 @@ import type { ProductCategory } from '~/types/dummyjson'
 import type {
   CatalogFiltersValue,
   CatalogSort,
+  PriceRange,
   SortField,
   SortOrder,
 } from '~/utils/catalog'
@@ -12,6 +13,7 @@ const props = defineProps<{
   /** Valeurs actuellement dans l'URL. */
   category: string
   sort: CatalogSort | null
+  price: PriceRange
   /** Recherche en cours, conservée quand le formulaire est envoyé sans JS. */
   search: string
 }>()
@@ -24,14 +26,23 @@ const emit = defineEmits<{
 const category = ref(props.category)
 const sortBy = ref<SortField | ''>(props.sort?.sortBy ?? '')
 const order = ref<SortOrder>(props.sort?.order ?? 'asc')
+// Avec type="number", v-model donne un nombre, ou '' si le champ est vide.
+const minPrice = ref<number | ''>(props.price.min ?? '')
+const maxPrice = ref<number | ''>(props.price.max ?? '')
+
+function toPrice(value: number | ''): number | null {
+  return value === '' ? null : value
+}
 
 // Si l'URL change autrement (bouton retour, lien partagé), on se resynchronise.
 watch(
-  () => [props.category, props.sort] as const,
-  ([newCategory, newSort]) => {
+  () => [props.category, props.sort, props.price] as const,
+  ([newCategory, newSort, newPrice]) => {
     category.value = newCategory
     sortBy.value = newSort?.sortBy ?? ''
     order.value = newSort?.order ?? 'asc'
+    minPrice.value = newPrice.min ?? ''
+    maxPrice.value = newPrice.max ?? ''
   },
 )
 
@@ -39,17 +50,25 @@ function onChange(): void {
   emit('change', {
     category: category.value,
     sort: sortBy.value ? { sortBy: sortBy.value, order: order.value } : null,
+    price: { min: toPrice(minPrice.value), max: toPrice(maxPrice.value) },
   })
 }
 </script>
 
 <template>
   <!--
-    Sans JavaScript : le bouton « Appliquer » envoie le formulaire en GET
-    vers /produits?category=…&sortBy=…&order=…, rendu par le serveur.
-    Avec JavaScript : chaque changement met à jour l'URL immédiatement.
+    Le bouton « Appliquer » envoie le formulaire en GET vers
+    /produits?category=…&sortBy=…&order=…&minPrice=…&maxPrice=…
+    Sans JavaScript, c'est le serveur qui rend la page filtrée.
+    Avec JavaScript, l'envoi est intercepté (@submit.prevent) et l'URL est
+    mise à jour directement ; les menus s'appliquent aussi dès qu'ils changent.
   -->
-  <form action="/produits" method="get" class="filters" @submit.prevent>
+  <form
+    action="/produits"
+    method="get"
+    class="filters"
+    @submit.prevent="onChange"
+  >
     <input v-if="search" type="hidden" name="q" :value="search" />
 
     <div class="filters__field">
@@ -96,9 +115,37 @@ function onChange(): void {
       </select>
     </div>
 
-    <noscript>
-      <button type="submit" class="filters__submit">Appliquer</button>
-    </noscript>
+    <fieldset class="filters__price">
+      <legend>Prix (€)</legend>
+      <div class="filters__field">
+        <label for="filter-min-price">Minimum</label>
+        <input
+          id="filter-min-price"
+          v-model="minPrice"
+          type="number"
+          name="minPrice"
+          min="0"
+          step="any"
+          inputmode="decimal"
+          @change="onChange"
+        />
+      </div>
+      <div class="filters__field">
+        <label for="filter-max-price">Maximum</label>
+        <input
+          id="filter-max-price"
+          v-model="maxPrice"
+          type="number"
+          name="maxPrice"
+          min="0"
+          step="any"
+          inputmode="decimal"
+          @change="onChange"
+        />
+      </div>
+    </fieldset>
+
+    <button type="submit" class="filters__submit">Appliquer</button>
   </form>
 </template>
 
@@ -130,7 +177,30 @@ function onChange(): void {
   font: inherit;
 }
 
+.filters__field input {
+  width: 7rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #767676;
+  border-radius: 0.375rem;
+  font: inherit;
+}
+
+.filters__price {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.filters__price legend {
+  margin-bottom: 0.375rem;
+  padding: 0;
+  font-weight: 600;
+}
+
 .filters__field select:focus-visible,
+.filters__field input:focus-visible,
 .filters__submit:focus-visible {
   outline: 3px solid #1a4fd8;
   outline-offset: 2px;
