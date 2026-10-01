@@ -9,12 +9,13 @@ import type { CatalogFiltersValue } from '~/utils/catalog'
 const route = useRoute()
 const router = useRouter()
 
-// L'URL est la source de vérité : page, recherche, catégorie et tri.
+// L'URL est la source de vérité : page, recherche, catégorie, tri et prix.
 const filters = computed(() => ({
   page: parsePage(route.query.page),
   search: parseSearch(route.query.q),
   category: parseCategory(route.query.category),
   sort: parseSort(route.query.sortBy, route.query.order),
+  price: parsePriceRange(route.query.minPrice, route.query.maxPrice),
 }))
 const request = computed(() => buildCatalogRequest(filters.value))
 
@@ -32,8 +33,8 @@ const { data, status, refresh } = await useFetch<
 >(() => request.value.path, {
   baseURL: API_BASE,
   query: computed(() => request.value.query),
-  // Mode `client` (recherche + catégorie) : l'API a renvoyé tous les résultats
-  // de la recherche, on garde ceux de la catégorie et on découpe la page.
+  // Mode `client` (recherche + catégorie, ou fourchette de prix) : l'API a
+  // renvoyé tous les candidats, on filtre et on découpe la page nous-mêmes.
   // `transform` s'exécute là où la requête a lieu (serveur au premier rendu) :
   // seule la page affichée est envoyée au navigateur.
   transform: (response) =>
@@ -74,17 +75,21 @@ function onFiltersChange(value: CatalogFiltersValue): void {
       category: value.category || undefined,
       sortBy: value.sort?.sortBy,
       order: value.sort?.order,
+      minPrice: value.price.min ?? undefined,
+      maxPrice: value.price.max ?? undefined,
       page: undefined,
     },
   })
 }
 
-// Lien « tout le catalogue » : sans recherche ni catégorie, en page 1.
+// Lien « tout le catalogue » : sans recherche, catégorie ni prix, en page 1.
 const resetLink = computed(() => ({
   query: {
     ...route.query,
     q: undefined,
     category: undefined,
+    minPrice: undefined,
+    maxPrice: undefined,
     page: undefined,
   },
 }))
@@ -109,6 +114,7 @@ useSeoMeta({
       :categories="categories"
       :category="filters.category"
       :sort="filters.sort"
+      :price="filters.price"
       :search="filters.search"
       @change="onFiltersChange"
     />
