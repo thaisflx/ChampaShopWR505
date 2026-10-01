@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const cartStore = useCartStore()
-await useAsyncData('cart-hydrate', () => cartStore.hydrate())
+await callOnce('cart-hydrate', () => cartStore.hydrate())
 const promoCodeInput = ref('')
 
 useSeoMeta({
