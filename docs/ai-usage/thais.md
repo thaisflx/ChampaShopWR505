@@ -18,3 +18,6 @@ Ce document retrace l'utilisation de l'assistant IA **opencode** (modèle **Mimo
 - L'IA a servi à proposer, expliquer et diagnostiquer ; chaque changement a été relu et validé par moi avant d'être commité.
 - Les résultats annoncés (CI verte, déploiement en production) ont toujours été vérifiés concrètement.
 - L'IA a surtout accéléré le débogage et la prise en main des outils (CI, tests, formatage, déploiement).
+
+
+ 
