@@ -66,13 +66,15 @@ export interface Product {
 }
 
 // Champs demandés au catalogue avec le paramètre `select` :
-// on ne télécharge que ce que la carte produit affiche.
+// on ne télécharge que ce que la carte produit affiche,
+// plus `category` pour filtrer côté client quand l'API ne sait pas le faire.
 export const PRODUCT_SUMMARY_FIELDS = [
   'title',
   'price',
   'discountPercentage',
   'rating',
   'thumbnail',
+  'category',
 ] as const
 
 // `id` est toujours renvoyé par DummyJSON, même s'il n'est pas dans `select`.
@@ -88,4 +90,11 @@ export interface ProductsResponse<T = Product> {
   total: number
   skip: number
   limit: number
+}
+
+// Une catégorie, telle que renvoyée par GET /products/categories.
+export interface ProductCategory {
+  slug: string
+  name: string
+  url: string
 }
