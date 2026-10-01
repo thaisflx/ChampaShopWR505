@@ -57,12 +57,11 @@ function onChange(): void {
 
 <template>
   <!--
-    Sans JavaScript : le bouton « Appliquer » envoie le formulaire en GET
-    vers /produits?category=…&sortBy=…&order=…&minPrice=…&maxPrice=…,
-    rendu par le serveur.
-    Avec JavaScript : chaque changement met à jour l'URL. Pour les prix,
-    l'événement `change` ne part qu'à la sortie du champ ou sur Entrée :
-    pas de requête à chaque chiffre tapé.
+    Le bouton « Appliquer » envoie le formulaire en GET vers
+    /produits?category=…&sortBy=…&order=…&minPrice=…&maxPrice=…
+    Sans JavaScript, c'est le serveur qui rend la page filtrée.
+    Avec JavaScript, l'envoi est intercepté (@submit.prevent) et l'URL est
+    mise à jour directement ; les menus s'appliquent aussi dès qu'ils changent.
   -->
   <form
     action="/produits"
@@ -146,9 +145,7 @@ function onChange(): void {
       </div>
     </fieldset>
 
-    <noscript>
-      <button type="submit" class="filters__submit">Appliquer</button>
-    </noscript>
+    <button type="submit" class="filters__submit">Appliquer</button>
   </form>
 </template>
 
