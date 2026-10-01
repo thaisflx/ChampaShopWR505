@@ -50,7 +50,9 @@ let feedbackTimeout: ReturnType<typeof setTimeout> | undefined
 
 function handleAddToCart(): void {
   if (!product.value || !stock.value.canAddToCart) return
-  const alreadyInCart = cartStore.items.find((item) => item.productId === product.value!.id)
+  const alreadyInCart = cartStore.items.find(
+    (item) => item.productId === product.value!.id,
+  )
   const currentQuantity = alreadyInCart?.quantity ?? 0
 
   if (currentQuantity >= product.value.stock) {
@@ -105,11 +107,20 @@ function handleAddToCart(): void {
         <button
           type="button"
           class="product__add"
-          :class="{ 'product__add--added': justAdded, 'product__add--limit': stockLimitReached }"
+          :class="{
+            'product__add--added': justAdded,
+            'product__add--limit': stockLimitReached,
+          }"
           :disabled="!stock.canAddToCart"
           @click="handleAddToCart"
         >
-          {{ stockLimitReached ? 'Stock maximum atteint' : justAdded ? 'Ajouté ✓' : 'Ajouter au panier' }}
+          {{
+            stockLimitReached
+              ? 'Stock maximum atteint'
+              : justAdded
+                ? 'Ajouté ✓'
+                : 'Ajouter au panier'
+          }}
         </button>
 
         <dl class="product__details">

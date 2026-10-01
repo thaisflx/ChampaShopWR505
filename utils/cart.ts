@@ -22,34 +22,43 @@ export interface MinimalCartItem {
 export function addItemToCart(
   items: CartItem[],
   product: Omit<CartItem, 'quantity'>,
-  quantity = 1
+  quantity = 1,
 ): CartItem[] {
-  const existingIndex = items.findIndex((item) => item.productId === product.productId)
+  const existingIndex = items.findIndex(
+    (item) => item.productId === product.productId,
+  )
   if (existingIndex === -1) {
     const cappedQuantity = Math.min(quantity, product.stock)
-    return cappedQuantity > 0 ? [...items, { ...product, quantity: cappedQuantity }] : items
+    return cappedQuantity > 0
+      ? [...items, { ...product, quantity: cappedQuantity }]
+      : items
   }
   return items.map((item, index) =>
     index === existingIndex
       ? { ...item, quantity: Math.min(item.quantity + quantity, item.stock) }
-      : item
+      : item,
   )
 }
 
-export function removeItemFromCart(items: CartItem[], productId: number): CartItem[] {
+export function removeItemFromCart(
+  items: CartItem[],
+  productId: number,
+): CartItem[] {
   return items.filter((item) => item.productId !== productId)
 }
 
 export function updateItemQuantity(
   items: CartItem[],
   productId: number,
-  quantity: number
+  quantity: number,
 ): CartItem[] {
   if (quantity <= 0) {
     return removeItemFromCart(items, productId)
   }
   return items.map((item) =>
-    item.productId === productId ? { ...item, quantity: Math.min(quantity, item.stock) } : item
+    item.productId === productId
+      ? { ...item, quantity: Math.min(quantity, item.stock) }
+      : item,
   )
 }
 
@@ -62,7 +71,7 @@ export function toCartLines(items: CartItem[]): CartLine[] {
     productId,
     category,
     unitPriceCents,
-    quantity
+    quantity,
   }))
 }
 
@@ -74,13 +83,15 @@ export function eurosToCents(amount: number): number {
   return Math.round(amount * 100)
 }
 
-export function productToCartItem(product: Product): Omit<CartItem, 'quantity'> {
+export function productToCartItem(
+  product: Product,
+): Omit<CartItem, 'quantity'> {
   return {
     productId: product.id,
     title: product.title,
     category: product.category,
     unitPriceCents: eurosToCents(product.price),
     thumbnail: product.thumbnail,
-    stock: product.stock
+    stock: product.stock,
   }
 }

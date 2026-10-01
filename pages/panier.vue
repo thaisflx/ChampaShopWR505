@@ -3,7 +3,7 @@ const cartStore = useCartStore()
 const promoCodeInput = ref('')
 
 useSeoMeta({
-  title: 'Mon panier | ChampaShop'
+  title: 'Mon panier | ChampaShop',
 })
 
 function applyPromoCode(): void {
@@ -22,11 +22,23 @@ function applyPromoCode(): void {
 
     <template v-else>
       <ul class="cart__list">
-        <li v-for="item in cartStore.items" :key="item.productId" class="cart__item">
-          <img v-if="item.thumbnail" :src="item.thumbnail" :alt="item.title" width="64" height="64" />
+        <li
+          v-for="item in cartStore.items"
+          :key="item.productId"
+          class="cart__item"
+        >
+          <img
+            v-if="item.thumbnail"
+            :src="item.thumbnail"
+            :alt="item.title"
+            width="64"
+            height="64"
+          />
           <div class="cart__item-info">
             <p class="cart__item-title">{{ item.title }}</p>
-            <p class="cart__item-price">{{ formatPrice(item.unitPriceCents / 100) }}</p>
+            <p class="cart__item-price">
+              {{ formatPrice(item.unitPriceCents / 100) }}
+            </p>
           </div>
 
           <label class="cart__item-qty">
@@ -39,7 +51,7 @@ function applyPromoCode(): void {
               @change="
                 cartStore.updateQuantity(
                   item.productId,
-                  Number(($event.target as HTMLInputElement).value)
+                  Number(($event.target as HTMLInputElement).value),
                 )
               "
             />
@@ -56,19 +68,33 @@ function applyPromoCode(): void {
 
       <form class="cart__promo" @submit.prevent="applyPromoCode">
         <label for="promo">Code promo</label>
-        <input id="promo" v-model="promoCodeInput" type="text" placeholder="TROYES10" />
+        <input
+          id="promo"
+          v-model="promoCodeInput"
+          type="text"
+          placeholder="TROYES10"
+        />
         <button type="submit">Appliquer</button>
       </form>
 
-      <ul v-if="cartStore.summary.messages.length" class="cart__messages" role="alert">
-        <li v-for="message in cartStore.summary.messages" :key="message">{{ message }}</li>
+      <ul
+        v-if="cartStore.summary.messages.length"
+        class="cart__messages"
+        role="alert"
+      >
+        <li v-for="message in cartStore.summary.messages" :key="message">
+          {{ message }}
+        </li>
       </ul>
 
       <dl class="cart__summary">
         <dt>Sous-total</dt>
         <dd>{{ formatPrice(cartStore.summary.grossCents / 100) }}</dd>
 
-        <template v-for="discount in cartStore.summary.discounts" :key="discount.id">
+        <template
+          v-for="discount in cartStore.summary.discounts"
+          :key="discount.id"
+        >
           <dt>{{ discount.label }}</dt>
           <dd>−{{ formatPrice(discount.amountCents / 100) }}</dd>
         </template>
@@ -83,7 +109,9 @@ function applyPromoCode(): void {
         </dd>
 
         <dt class="cart__total-label">Total</dt>
-        <dd class="cart__total-value">{{ formatPrice(cartStore.summary.totalCents / 100) }}</dd>
+        <dd class="cart__total-value">
+          {{ formatPrice(cartStore.summary.totalCents / 100) }}
+        </dd>
       </dl>
     </template>
   </section>

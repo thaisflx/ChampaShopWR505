@@ -9,7 +9,7 @@ import {
   toMinimalCartItems,
   productToCartItem,
   type CartItem,
-  type MinimalCartItem
+  type MinimalCartItem,
 } from '~/utils/cart'
 import type { Product } from '~/types/dummyjson'
 
@@ -20,7 +20,7 @@ export const useCartStore = defineStore('cart', () => {
   const cartCookie = useCookie<MinimalCartItem[]>(CART_COOKIE_NAME, {
     default: () => [],
     maxAge: CART_COOKIE_MAX_AGE_SECONDS,
-    sameSite: 'lax'
+    sameSite: 'lax',
   })
 
   const items = ref<CartItem[]>([])
@@ -38,17 +38,20 @@ export const useCartStore = defineStore('cart', () => {
     const results = await Promise.all(
       cartCookie.value.map(async (entry) => {
         try {
-          const product = await $fetch<Product>(`/products/${entry.productId}`, {
-            baseURL: API_BASE
-          })
+          const product = await $fetch<Product>(
+            `/products/${entry.productId}`,
+            {
+              baseURL: API_BASE,
+            },
+          )
           return {
             ...productToCartItem(product),
-            quantity: Math.min(entry.quantity, product.stock)
+            quantity: Math.min(entry.quantity, product.stock),
           }
         } catch {
           return null
         }
-      })
+      }),
     )
     items.value = results.filter((item): item is CartItem => item !== null)
     hydrated.value = true
@@ -63,7 +66,7 @@ export const useCartStore = defineStore('cart', () => {
     (value) => {
       cartCookie.value = toMinimalCartItems(value)
     },
-    { deep: true }
+    { deep: true },
   )
 
   function addItem(product: Omit<CartItem, 'quantity'>, quantity = 1): void {
@@ -88,7 +91,9 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   const itemCount = computed(() => getItemCount(items.value))
-  const summary = computed(() => computeCart(toCartLines(items.value), promoCode.value))
+  const summary = computed(() =>
+    computeCart(toCartLines(items.value), promoCode.value),
+  )
 
   return {
     items,
@@ -101,6 +106,6 @@ export const useCartStore = defineStore('cart', () => {
     removeItem,
     updateQuantity,
     applyPromoCode,
-    clearCart
+    clearCart,
   }
 })
