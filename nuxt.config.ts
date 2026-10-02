@@ -1,15 +1,17 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2026-09-23',
   devtools: { enabled: true },
 
-  modules: [
-    '@pinia/nuxt',
-    '@nuxt/eslint',
-    '@nuxt/test-utils/module'
-  ],
+  modules: ['@pinia/nuxt', '@nuxt/eslint', '@nuxt/test-utils/module'],
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'fr' },
+    },
+  },
 
   typescript: {
-    strict: true
-  }
+    strict: true,
+    typeCheck: true,
+  },
 })
