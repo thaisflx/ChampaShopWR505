@@ -27,12 +27,37 @@ describe('parseCompareIds', () => {
     expect(parseCompareIds(null)).toEqual([])
     expect(parseCompareIds(undefined)).toEqual([])
     expect(parseCompareIds([])).toEqual([])
-    expect(parseCompareIds(42)).toEqual([])
     expect(parseCompareIds('')).toEqual([])
+    expect(parseCompareIds(true)).toEqual([])
+    expect(parseCompareIds({})).toEqual([])
   })
 
   it('accepte un paramètre répété dans l’URL (tableau de chaînes)', () => {
     expect(parseCompareIds(['1', '2,3'])).toEqual([1, 2, 3])
+  })
+
+  it('lit un nombre seul (cookie à un seul identifiant)', () => {
+    expect(parseCompareIds(42)).toEqual([42])
+  })
+
+  it('lit un tableau de nombres (cookie JSON)', () => {
+    expect(parseCompareIds([3, 17])).toEqual([3, 17])
+  })
+
+  it('lit un tableau mixte de chaînes et de nombres', () => {
+    expect(parseCompareIds(['1', 2, '3,4'])).toEqual([1, 2, 3])
+  })
+
+  it('ignore les nombres invalides et les autres types dans un tableau', () => {
+    expect(parseCompareIds([0, -1, 1.5, Number.NaN, true, {}, 7])).toEqual([7])
+  })
+
+  it('supprime les doublons entre nombres et chaînes', () => {
+    expect(parseCompareIds([5, '5', 5])).toEqual([5])
+  })
+
+  it('limite aussi un tableau de nombres au maximum autorisé', () => {
+    expect(parseCompareIds([1, 2, 3, 4])).toEqual([1, 2, 3])
   })
 })
 
@@ -56,6 +81,13 @@ describe('toggleCompare', () => {
       ids: [1, 2, 3],
       rejected: true,
     })
+  })
+
+  it('renvoie une copie de la liste quand elle est pleine', () => {
+    const ids = [1, 2, 3]
+    const result = toggleCompare(ids, 4)
+    expect(result.ids).toEqual([1, 2, 3])
+    expect(result.ids).not.toBe(ids)
   })
 
   it('permet de retirer un produit même quand la liste est pleine', () => {
