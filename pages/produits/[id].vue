@@ -33,6 +33,10 @@ if (error.value || !product.value) {
   })
 }
 
+// Visite d'une fiche existante (la 404 est déjà passée) : on l'ajoute à l'historique.
+const recentlyViewed = useRecentlyViewedStore()
+recentlyViewed.add(product.value.id)
+
 const stock = computed(() => getStockStatus(product.value?.stock ?? 0))
 
 useSeoMeta({
@@ -131,6 +135,8 @@ function handleAddToCart(): void {
         </dl>
       </div>
     </div>
+
+    <RecentlyViewed :exclude-id="product.id" />
   </article>
 </template>
 

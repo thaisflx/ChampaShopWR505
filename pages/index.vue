@@ -12,5 +12,7 @@ useSeoMeta({
     <p>
       <NuxtLink to="/produits">Découvrir le catalogue</NuxtLink>
     </p>
+
+    <RecentlyViewed />
   </section>
 </template>
