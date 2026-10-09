@@ -1,10 +1,22 @@
+<script setup lang="ts">
+const cartStore = useCartStore()
+</script>
+
 <template>
   <div class="layout">
     <header class="layout__header">
       <NuxtLink to="/" class="layout__brand">ChampaShop</NuxtLink>
       <nav aria-label="Navigation principale">
         <ul class="layout__nav">
+          <li><NuxtLink to="/">Accueil</NuxtLink></li>
           <li><NuxtLink to="/produits">Catalogue</NuxtLink></li>
+          <li>
+            <NuxtLink to="/panier">
+              Panier<span v-if="cartStore.itemCount > 0">
+                ({{ cartStore.itemCount }})</span
+              >
+            </NuxtLink>
+          </li>
         </ul>
       </nav>
     </header>
@@ -47,6 +59,10 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.layout__nav a.router-link-active {
+  font-weight: 700;
 }
 
 .layout__main {
