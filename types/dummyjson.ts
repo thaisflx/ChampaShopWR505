@@ -98,3 +98,26 @@ export interface ProductCategory {
   name: string
   url: string
 }
+
+// Champs demandés pour la page /comparer (paramètre `select`) :
+// tout ce qu'affiche le tableau comparatif, et rien de plus.
+export const COMPARED_PRODUCT_FIELDS = [
+  'title',
+  'thumbnail',
+  'price',
+  'discountPercentage',
+  'rating',
+  'availabilityStatus',
+  'stock',
+  'brand',
+  'category',
+  'weight',
+  'dimensions',
+  'warrantyInformation',
+  'shippingInformation',
+] as const
+
+export type ComparedProduct = Pick<
+  Product,
+  'id' | (typeof COMPARED_PRODUCT_FIELDS)[number]
+>
