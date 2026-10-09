@@ -34,6 +34,8 @@ const discountLabel = computed(() =>
       {{ formatRating(product.rating) }}
       <span class="visually-hidden">sur 5</span>
     </p>
+
+    <CompareButton :product-id="product.id" :title="product.title" />
   </article>
 </template>
 

@@ -127,6 +127,8 @@ function handleAddToCart(): void {
           }}
         </button>
 
+        <CompareButton :product-id="product.id" :title="product.title" />
+
         <dl class="product__details">
           <dt>Garantie</dt>
           <dd>{{ product.warrantyInformation }}</dd>
