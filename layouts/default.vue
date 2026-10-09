@@ -12,10 +12,20 @@
     <main class="layout__main">
       <slot />
     </main>
+
+    <CompareBar />
   </div>
 </template>
 
 <style scoped>
+/* Colonne pleine hauteur : la barre de comparaison (sticky) reste
+   collée en bas de l'écran, même sur une page courte. */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .layout__header {
   display: flex;
   align-items: center;
@@ -40,6 +50,9 @@
 }
 
 .layout__main {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem 2rem;

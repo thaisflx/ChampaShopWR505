@@ -2,6 +2,8 @@
 
 Ce document retrace l'utilisation de l'assistant IA dans le cadre du projet ChampaShopWR505.
 
+## Semaine 1
+
 | Date | Outil | Ce que j'ai demandé | Ce que j'ai gardé / modifié / rejeté, et pourquoi |
 
 | --- | --- | --- | --- |
@@ -27,3 +29,9 @@ Ce document retrace l'utilisation de l'assistant IA dans le cadre du projet Cham
 - L'IA a servi à proposer, expliquer et diagnostiquer ; chaque changement a été relu et validé par moi avant d'être commité.
 - Les résultats annoncés (CI verte, déploiement en production) ont toujours été vérifiés concrètement.
 - L'IA a surtout accéléré le débogage et la prise en main des outils (CI, tests, formatage, déploiement), ainsi que l'implémentation des fonctionnalités (promotions, panier) et la relecture des PR de l'équipe.
+
+## Semaine 2
+
+| 07/10 | Claude | Fonctions pures du comparateur (`parseCompareIds`, `toggleCompare`) et leurs tests | Gardé la structure en deux fonctions pures. Remplacé ma validation par `parsePositiveInt` déjà présent dans le projet pour rester cohérente avec `/produits/[id]`. Relu chaque cas de test (doublons, ordre, dépassement du max, entrées invalides). |
+
+| 08/10 | Claude | Vérification de la sélection du comparateur (F6) par rapport au brief, puis barre de comparaison `CompareBar.vue` | Relecture : le message du 4ᵉ produit ne reprenait pas le texte imposé, et la zone `aria-live` en `display: none` risquait de ne pas être annoncée. Corrigé les deux. Barre reprise sur le modèle de « Vus récemment » (appels parallèles + `select`). Vérifié en SSR avec un cookie contenant un produit inexistant (99999) : il reste affiché et retirable, sans bloquer les autres. |
