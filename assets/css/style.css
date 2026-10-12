@@ -1,0 +1,829 @@
+/* =========================================================
+   ChampaShop — thème éditorial (inspiré de la maquette « Raiment »)
+   Fond crème, typographie grotesque en capitales, filets fins,
+   boutons noirs rectangulaires, aucun arrondi.
+
+   Toutes les règles sont préfixées par #__nuxt (la racine de l'app)
+   pour passer devant les styles « scoped » des composants
+   sans avoir à les modifier.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #f4f2ea;
+  --surface: #fcfbf5;
+  --ink: #161616;
+  --muted: #5c5c5c;
+  --line: #c9c6bd;
+  --error: #b3261e;
+  --warning: #8a4b00;
+  --success: #1b6b2f;
+  --font: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ---------- Base ---------- */
+
+html body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#__nuxt *,
+#__nuxt *::before,
+#__nuxt *::after {
+  box-sizing: border-box;
+}
+
+#__nuxt h1,
+#__nuxt h2 {
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+#__nuxt h1 {
+  margin: 0 0 2rem;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+}
+
+#__nuxt h2 {
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+}
+
+#__nuxt a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+#__nuxt :focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Boutons : rectangle noir, capitales. */
+#__nuxt button {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#__nuxt button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+#__nuxt button:disabled {
+  border-color: var(--muted);
+  background: var(--muted);
+  color: var(--surface);
+  cursor: not-allowed;
+}
+
+/* Champs : un simple filet en bas. */
+#__nuxt input,
+#__nuxt select {
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+#__nuxt label,
+#__nuxt legend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Header ---------- */
+
+#__nuxt .layout__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--ink);
+  background: var(--surface);
+}
+
+/* Logo centré comme « RAIMENT ». */
+#__nuxt .layout__brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+#__nuxt .layout__header nav {
+  margin-left: auto;
+}
+
+#__nuxt .layout__nav a {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+#__nuxt .layout__nav a:hover,
+#__nuxt .layout__nav a.router-link-exact-active {
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+#__nuxt .layout__main {
+  padding: 3rem 2rem 4rem;
+}
+
+/* ---------- Accueil ---------- */
+
+#__nuxt .layout__main > section > h1:first-child {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+/* Le lien « Découvrir le catalogue » prend l'allure du « SHOP NOW ». */
+#__nuxt .layout__main > section > h1 + p a {
+  display: inline-block;
+  min-width: 16rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+#__nuxt .layout__main > section > h1 + p a:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ---------- Catalogue : recherche et filtres ---------- */
+
+#__nuxt .search {
+  gap: 0.25rem;
+  margin-bottom: 2rem;
+}
+
+#__nuxt .search__label {
+  font-weight: 500;
+}
+
+#__nuxt .search__input {
+  appearance: none;
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  font-size: 1.25rem;
+}
+
+#__nuxt .filters {
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+#__nuxt .filters__field label {
+  font-weight: 500;
+}
+
+#__nuxt .filters__field select,
+#__nuxt .filters__field input {
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+}
+
+#__nuxt .filters__price legend {
+  font-weight: 500;
+}
+
+#__nuxt .filters__submit {
+  margin-left: auto;
+  border-radius: 0;
+  background: var(--ink);
+}
+
+/* ---------- Grille de produits (bordures partagées) ---------- */
+
+#__nuxt .product-grid {
+  gap: 0;
+  margin: 0 1px 1px 0;
+}
+
+#__nuxt .product-grid > li {
+  margin: 0 -1px -1px 0;
+}
+
+#__nuxt .empty {
+  padding: 4rem 1rem;
+  border: 1px solid var(--line);
+}
+
+/* ---------- Carte produit : photo puis « nom … prix » ---------- */
+
+#__nuxt .product-card {
+  position: relative;
+  gap: 0;
+  height: 100%;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  /* La largeur de la carte (100cqw) sert à placer le prix sous l'image. */
+  container-type: inline-size;
+}
+
+#__nuxt .product-card__link {
+  text-decoration: none;
+}
+
+#__nuxt .product-card__media {
+  overflow: hidden;
+}
+
+#__nuxt .product-card__media img {
+  transition: transform 0.4s;
+}
+
+#__nuxt .product-card__link:hover img {
+  transform: scale(1.04);
+}
+
+#__nuxt .product-card__badge {
+  top: 0.75rem;
+  left: 0.75rem;
+  border-radius: 0;
+  background: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+#__nuxt .product-card__title {
+  margin: 0;
+  padding: 0.5rem 5.5rem 0.5rem 0.75rem;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+}
+
+/* Le prix remonte à droite du nom, sur la même ligne. */
+#__nuxt .product-card__price {
+  position: absolute;
+  top: calc(100cqw + 1px + 0.5rem);
+  right: 0.75rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+#__nuxt .product-card__rating {
+  margin: 0 0.75rem 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+#__nuxt .product-card .compare {
+  margin-top: auto;
+}
+
+/* Bouton « Comparer » : bande pleine largeur en bas de la carte. */
+#__nuxt .product-card .compare__button {
+  width: 100%;
+  padding: 0.625rem;
+  border: none;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+#__nuxt .compare__button {
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.75rem;
+}
+
+#__nuxt .compare__button:hover:not(:disabled),
+#__nuxt .product-card .compare__button:hover:not(:disabled),
+#__nuxt .compare__button--selected,
+#__nuxt .product-card .compare__button--selected {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+#__nuxt .compare__message {
+  margin: 0;
+  padding: 0 0.75rem;
+  color: var(--warning);
+  font-size: 0.8125rem;
+}
+
+/* ---------- Squelette de chargement ---------- */
+
+#__nuxt .skeleton {
+  height: 100%;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+}
+
+#__nuxt .skeleton__block {
+  border-radius: 0;
+  background: #e6e2d8;
+}
+
+/* ---------- Pagination ---------- */
+
+#__nuxt .pagination {
+  justify-content: space-between;
+  margin: 3rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ink);
+}
+
+#__nuxt .pagination__link {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+#__nuxt .pagination__link:hover {
+  text-decoration: underline;
+}
+
+#__nuxt .pagination__link[aria-disabled='true'] {
+  color: var(--muted);
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+#__nuxt .pagination__status {
+  font-size: 0.875rem;
+}
+
+/* ---------- Vus récemment ---------- */
+
+#__nuxt .recent {
+  margin-top: 4rem;
+}
+
+#__nuxt .recent__header {
+  align-items: baseline;
+}
+
+#__nuxt .recent__clear {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+
+#__nuxt .recent__clear:hover:not(:disabled) {
+  background: none;
+  color: var(--muted);
+}
+
+#__nuxt .recent__list {
+  gap: 0;
+  margin: 1.5rem 1px 1px 0;
+}
+
+#__nuxt .recent__list > li {
+  margin: 0 -1px -1px 0;
+}
+
+#__nuxt .recent__item {
+  height: 100%;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+}
+
+#__nuxt .recent__name {
+  padding: 0.5rem 0.625rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.8125rem;
+  text-transform: lowercase;
+}
+
+#__nuxt .recent__price {
+  padding: 0 0.625rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ---------- Barre de comparaison ---------- */
+
+#__nuxt .compare-bar {
+  border-top: 1px solid var(--ink);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+#__nuxt .compare-bar__item {
+  border: 1px solid var(--line);
+  border-radius: 0;
+}
+
+#__nuxt .compare-bar__name {
+  font-size: 0.8125rem;
+  text-transform: lowercase;
+}
+
+#__nuxt .compare-bar__remove {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+
+#__nuxt .compare-bar__link {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+#__nuxt .compare-bar__link:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ---------- Message d'erreur ---------- */
+
+#__nuxt .error-message {
+  border: 1px solid var(--error);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--error);
+}
+
+#__nuxt .error-message__button {
+  border-color: var(--error);
+  border-radius: 0;
+  background: var(--error);
+}
+
+#__nuxt .error-message__button:hover {
+  color: var(--error);
+}
+
+/* ---------- Fiche produit ---------- */
+
+#__nuxt .product__back {
+  margin-bottom: 2rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#__nuxt .product__back a {
+  text-decoration: none;
+}
+
+#__nuxt .product__layout {
+  gap: 3rem;
+}
+
+#__nuxt .gallery__main {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+}
+
+#__nuxt .gallery__thumb {
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+}
+
+#__nuxt .gallery__thumb:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+#__nuxt .gallery__thumb[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+#__nuxt .product__brand {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+#__nuxt .product__title {
+  margin: 0.5rem 0 1rem;
+}
+
+#__nuxt .product__price {
+  padding: 1rem 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  font-weight: 600;
+}
+
+#__nuxt .product__description {
+  color: var(--muted);
+}
+
+#__nuxt .product__stock {
+  color: var(--success);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#__nuxt .product__stock--low {
+  color: var(--warning);
+}
+
+#__nuxt .product__stock--out {
+  color: var(--error);
+}
+
+#__nuxt .product__add {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0;
+  background: var(--ink);
+}
+
+#__nuxt .product__add:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+#__nuxt .product__add:disabled {
+  background: var(--muted);
+}
+
+#__nuxt .product__add--added {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+#__nuxt .product__add--limit {
+  border-color: var(--warning);
+  background: var(--warning);
+}
+
+#__nuxt .product__info .compare {
+  margin-top: 0.75rem;
+}
+
+#__nuxt .product__info .compare__button {
+  width: 100%;
+  padding: 1rem;
+}
+
+#__nuxt .product__details {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.875rem;
+}
+
+#__nuxt .product__details dt {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Panier ---------- */
+
+#__nuxt .cart__list {
+  padding: 0;
+  border-top: 1px solid var(--ink);
+  list-style: none;
+}
+
+#__nuxt .cart__item {
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#__nuxt .cart__item img {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  object-fit: contain;
+}
+
+#__nuxt .cart__item-title {
+  margin: 0;
+  text-transform: lowercase;
+}
+
+#__nuxt .cart__item-price {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+}
+
+#__nuxt .cart__item-qty {
+  display: flex;
+  flex-direction: column;
+}
+
+/* « Retirer » : lien souligné plutôt qu'un gros bouton noir. */
+#__nuxt .cart__item button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+
+#__nuxt .cart__item button:hover:not(:disabled) {
+  background: none;
+  color: var(--muted);
+}
+
+#__nuxt .cart__empty {
+  padding: 4rem 1rem;
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+#__nuxt .cart__promo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+#__nuxt .cart__promo label {
+  width: 100%;
+}
+
+#__nuxt .cart__messages {
+  padding: 0;
+  color: var(--warning);
+  font-size: 0.875rem;
+  list-style: none;
+}
+
+#__nuxt .cart__summary {
+  max-width: 24rem;
+  margin: 2.5rem 0 0 auto;
+  padding: 1.5rem;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+}
+
+#__nuxt .cart__summary dd {
+  margin: 0;
+  text-align: right;
+}
+
+#__nuxt .cart__total-label,
+#__nuxt .cart__total-value {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Connexion / Compte ---------- */
+
+#__nuxt .login {
+  padding: 2.5rem;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+}
+
+#__nuxt .login__field input {
+  padding: 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+}
+
+#__nuxt .login button {
+  width: 100%;
+}
+
+#__nuxt .login__error {
+  color: var(--error);
+  font-size: 0.875rem;
+}
+
+#__nuxt .login__hint {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+#__nuxt .account__card {
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+#__nuxt .account__card img {
+  border: 1px solid var(--line);
+}
+
+#__nuxt .account__name {
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 640px) {
+  #__nuxt .layout__header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  #__nuxt .layout__brand {
+    position: static;
+    transform: none;
+    font-size: 1.125rem;
+  }
+
+  #__nuxt .layout__header nav {
+    margin-left: 0;
+  }
+
+  #__nuxt .layout__main {
+    padding: 2rem 1rem 3rem;
+  }
+
+  #__nuxt .compare-bar {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #__nuxt *,
+  #__nuxt *::before,
+  #__nuxt *::after {
+    transition: none !important;
+  }
+}
